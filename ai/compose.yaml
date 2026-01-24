@@ -8,7 +8,7 @@ services:
     environment:
       - WEBUI_SECRET_KEY
       - CORS_ALLOW_ORIGIN
-      - OLLAMA_BASE_URL
+      - OLLAMA_BASE_URL=http://ollama:11434
       - OPENAI_API_KEY
       - ENABLE_RAG_WEB_SEARCH
       - RAG_WEB_SEARCH_RESULT_COUNT
@@ -20,8 +20,8 @@ services:
       - RAG_EMBEDDING_MODEL
       - RAG_TOP_K
       - RAG_OLLAMA_BASE_URL
-      - VECTOR_DB
-      - QDRANT_URI
+      - VECTOR_DB=qdrant
+      - QDRANT_URI=http://qdrant:6333
       - QDRANT_API_KEY
     volumes:
       - /data/containers/open-webui:/app/backend/data
@@ -44,6 +44,50 @@ services:
       driver: json-file
       options:
         max-size: 10m
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    # ports:
+    #   - "11434:11434"
+    volumes:
+      - /data/containers/ollama:/root/.ollama
+    devices:
+      - /dev/dri:/dev/dri
+    networks:
+     ingress: {}
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '12.00'
+          memory: 16G
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant:latest
+    # ports:
+    #   - "6333:6333"
+    volumes:
+      - /data/containers/qdrant:/qdrant/storage
+    networks:
+      ingress:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 4G
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
 
 networks:
   ingress:
