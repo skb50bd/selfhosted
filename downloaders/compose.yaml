@@ -72,6 +72,8 @@ services:
       - PUBLIC_METRICS_API=${PUBLIC_METRICS_API:-}
       - PROWLARR_API_KEY=${PROWLARR_API_KEY:-}
       - TORBOX_API_KEY=${TORBOX_API_KEY:-}
+    env_file:
+      - .env.comet.conf
     volumes:
       - /data/containers/comet:/data
     logging:
