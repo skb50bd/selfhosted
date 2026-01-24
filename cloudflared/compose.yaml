@@ -4,10 +4,13 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
-    command: tunnel --no-autoupdate run
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
     restart: unless-stopped
     environment:
-      - TUNNEL_TOKEN
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN:?Tunnel token is required}
       - TUNNEL_METRICS=0.0.0.0:2000
     healthcheck:
       test: ["CMD", "cloudflared", "tunnel", "--metrics", "localhost:2000", "ready"]
