@@ -11,7 +11,7 @@ services:
       - c 10:200 rwm
     environment:
       - WARP_SLEEP=2
-      - WARP_LICENSE_KEY
+      - WARP_LICENSE_KEY=${WARP_LICENSE_KEY:-}
     healthcheck:
       # Tests if the 'warp' status in the trace is either 'on' or 'plus'
       test: ["CMD-SHELL", "curl -fsS https://www.cloudflare.com/cdn-cgi/trace | grep -qE 'warp=(plus|on)' || exit 1"]
@@ -68,12 +68,10 @@ services:
       retries: 5
       start_period: 10s
     environment:
-      - ADMIN_DASHBOARD_PASSWORD
-      - PUBLIC_METRICS_API
-      - PROWLARR_API_KEY
-      - TORBOX_API_KEY
-    env_file:
-      - .env.comet.config
+      - ADMIN_DASHBOARD_PASSWORD=${ADMIN_DASHBOARD_PASSWORD:?Admin dashboard password is required}
+      - PUBLIC_METRICS_API=${PUBLIC_METRICS_API:-}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY:-}
+      - TORBOX_API_KEY=${TORBOX_API_KEY:-}
     volumes:
       - /data/containers/comet:/data
     logging:
@@ -93,9 +91,9 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=1000 # Replace with your PUID
-      - PGID=1000 # Replace with your PGID
-      - TZ=Asia/Dhaka # Replace with your timezone, e.g., America/Denver or Europe/Bucharest
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Dhaka
     volumes:
       - /data/containers/prowlarr/:/config # Replace with the absolute path to your config directory
       # Optional: Add volumes for media or downloads if you plan to use local file syncing
@@ -126,9 +124,9 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Dhaka
-      - NZBGET_USER
-      - NZBGET_PASS
-      - NZBGET_SERVER1_URL
+      - NZBGET_USER=${NZBGET_USER:?NZBGet username is required}
+      - NZBGET_PASS=${NZBGET_PASS:?NZBGet password is required}
+      - NZBGET_SERVER1_URL=${NZBGET_SERVER1_URL:?NZBGet server URL is required}
     volumes:
       - /data/containers/nzbget:/config
       - /data/downloadp/incomplete:/downloads/incomplete
@@ -191,7 +189,7 @@ services:
     volumes:
     - /mnt/samsung2TB/Music/deezer:/mnt/deezer-downloader
     environment:
-    - DEEZER_COOKIE_ARL
+    - DEEZER_COOKIE_ARL=${DEEZER_COOKIE_ARL:?Deezer cookie ARL is required}
     - DEEZER_QUALITY=${DEEZER_QUALITY:-mp3}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000"]
