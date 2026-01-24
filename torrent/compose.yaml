@@ -1,0 +1,79 @@
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    networks:
+      ingress: {}
+    user: "1000:1000"
+    environment:
+      - TZ
+      - PUID=1000
+      - PGID=1000
+      - WEBUI_PORT=8765
+      - TORRENTING_PORT=6881
+    volumes:
+      - /data/containers/torrent/qbt/config:/config:rw
+      - /mnt/samsung2TB/Videos/Movies:/media/movies:rw
+      - /mnt/samsung2TB/Videos/Shows:/media/shows:rw
+      - /mnt/samsung2TB/Music:/media/music:rw
+      - /data/downloads:/downloads:rw
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://localhost:8765"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    ports:
+      - 6881:6881
+
+  flood:
+    image: jesec/flood:master
+    container_name: flood
+    command: --port 80 --rundir /config
+    networks:
+      ingress: {}
+    environment:
+      - TZ
+      - HOME=/config
+    volumes:
+      - /data/containers/torrent/flood/config:/config
+      - /mnt/samsung2TB/Videos/Movies:/media/movies:rw
+      - /mnt/samsung2TB/Videos/Shows:/media/shows:rw
+      - /mnt/samsung2TB/Music:/media/music:rw
+      - /data/downloads:/downloads:rw
+    user: "1000:1000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.100'
+          memory: 256M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+networks:
+  ingress:
+    external: true
