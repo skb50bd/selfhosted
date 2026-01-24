@@ -1,0 +1,50 @@
+name: ai
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      - WEBUI_SECRET_KEY
+      - CORS_ALLOW_ORIGIN
+      - OLLAMA_BASE_URL
+      - OPENAI_API_KEY
+      - ENABLE_RAG_WEB_SEARCH
+      - RAG_WEB_SEARCH_RESULT_COUNT
+      - RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+      - RAG_WEB_SEARCH_ENGINE
+      - GOOGLE_PSE_API_KEY
+      - GOOGLE_PSE_ENGINE_ID
+      - RAG_EMBEDDING_ENGINE
+      - RAG_EMBEDDING_MODEL
+      - RAG_TOP_K
+      - RAG_OLLAMA_BASE_URL
+      - VECTOR_DB
+      - QDRANT_URI
+      - QDRANT_API_KEY
+    volumes:
+      - /data/containers/open-webui:/app/backend/data
+    devices:
+      - /dev/dri:/dev/dri
+    networks:
+      ingress:
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://127.0.0.1:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.00'
+          memory: 4G
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    external: true

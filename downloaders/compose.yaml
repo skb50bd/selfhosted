@@ -1,0 +1,221 @@
+name: comet
+
+services:
+  warp:
+    image: caomingjun/warp:latest
+    container_name: warp
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    device_cgroup_rules:
+      - c 10:200 rwm
+    environment:
+      - WARP_SLEEP=2
+      - WARP_LICENSE_KEY
+    healthcheck:
+      # Tests if the 'warp' status in the trace is either 'on' or 'plus'
+      test: ["CMD-SHELL", "curl -fsS https://www.cloudflare.com/cdn-cgi/trace | grep -qE 'warp=(plus|on)' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    volumes:
+      - /data/containers/warp:/var/lib/cloudflare-warp
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: 512M
+    networks:
+      warp: {}
+      ingress: {}
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Dhaka
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "4.00"
+          memory: 4G
+    network_mode: service:warp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  comet:
+    container_name: comet
+    image: g0ldyy/comet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    environment:
+      - ADMIN_DASHBOARD_PASSWORD
+      - PUBLIC_METRICS_API
+      - PROWLARR_API_KEY
+      - TORBOX_API_KEY
+    env_file:
+      - .env.comet.config
+    volumes:
+      - /data/containers/comet:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "4.00"
+          memory: 1G
+    networks:
+      ingress: {}
+      warp: {}
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000 # Replace with your PUID
+      - PGID=1000 # Replace with your PGID
+      - TZ=Asia/Dhaka # Replace with your timezone, e.g., America/Denver or Europe/Bucharest
+    volumes:
+      - /data/containers/prowlarr/:/config # Replace with the absolute path to your config directory
+      # Optional: Add volumes for media or downloads if you plan to use local file syncing
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:9696"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    networks:
+      ingress: {}
+      warp: {}
+
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Dhaka
+      - NZBGET_USER
+      - NZBGET_PASS
+      - NZBGET_SERVER1_URL
+    volumes:
+      - /data/containers/nzbget:/config
+      - /data/downloadp/incomplete:/downloads/incomplete
+      - /data/downloadp/complete:/downloads/complete
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:6789"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    networks:
+      ingress: {}
+      warp: {}
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Dhaka
+    volumes:
+      - /data/containers/sabnzbd/config:/config
+      - /data/downloads/incomplete:/incomplete-downloads #optional
+      - /data/downloads/complete:/downloads #optional
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    networks:
+      ingress: {}
+      warp: {}
+
+  deezloader:
+    image: kmille2/deezer-downloader:latest
+    container_name: deezloader
+    restart: unless-stopped
+    volumes:
+    - /mnt/samsung2TB/Music/deezer:/mnt/deezer-downloader
+    environment:
+    - DEEZER_COOKIE_ARL
+    - DEEZER_QUALITY=${DEEZER_QUALITY:-mp3}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress: {}
+
+networks:
+  ingress:
+    external: true
+  warp:
+    external: true

@@ -1,0 +1,32 @@
+name: filebrowser
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    restart: unless-stopped
+    container_name: filebrowser
+    volumes:
+      - /mnt/ts1TB:/srv/ts1TB
+      - /mnt/samsung2TB:/srv/samsung2TB
+      - /mnt/adata1TB:/srv/adata1TB
+      - /mnt/wd1TB:/srv/wd1TB
+      - /data:/srv/data
+      - /data/containers/filebrowser/database:/database
+      - /data/containers/filebrowser/config:/config
+    environment:
+      - PUID=0
+      - PGID=0
+    networks:
+      - ingress
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    external: true
