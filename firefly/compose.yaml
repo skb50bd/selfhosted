@@ -99,11 +99,12 @@ services:
   firefly-iii-mcpo:
     image: skb50bd/firefly-iii-mcpo
     container_name: firefly-iii-mcpo
+    hostname: firefly-iii-mcpo
     restart: unless-stopped
     depends_on:
     - firefly
     # ports:
-    #   - 3000:8000
+    #   - 8000:8000
     environment:
       - FIREFLY_III_BASE_URL=http://firefly:8080
       - FIREFLY_III_PRESET=full
@@ -111,6 +112,17 @@ services:
     networks:
     - ingress
     - firefly-network
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8000'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 1G
     logging:
       driver: json-file
       options:
