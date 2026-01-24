@@ -1,0 +1,35 @@
+services:
+  stremio:
+    image: stremio/server:latest
+    container_name: stremio
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://localhost:11470"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    environment:
+      NO_CORS: "1"
+      AUTO_SERVER_URL: "1"
+    volumes:
+      - /data/containers/stremio/stremio-cache:/root/.stremio-server/stremio-cache
+    devices:
+      - /dev/dri:/dev/dri
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress: null
+networks:
+  ingress:
+    external: true

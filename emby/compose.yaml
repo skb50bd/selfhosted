@@ -1,0 +1,40 @@
+name: emby
+
+services:
+  emby:
+    image: lscr.io/linuxserver/emby:latest
+    restart: unless-stopped
+    container_name: emby
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Dhaka
+    volumes:
+      - /data/containers/emby/config:/config
+      - /mnt/samsung2TB/:/media/samsung2TB
+      - /data/personal:/media/personal
+      - /data/shahed:/media/shahed
+      - /mnt/dflix:/media/dflix:ro
+    devices:
+      - /dev/dri:/dev/dri
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://127.0.0.1:8096"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.00'
+          memory: 8G
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress: {}
+
+networks:
+  ingress:
+    external: true

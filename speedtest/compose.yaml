@@ -1,0 +1,89 @@
+name: speedtests
+
+services:
+  speedtest:
+    image: openspeedtest/latest
+    container_name: speedtest
+    hostname: speedtest
+    domainname: brotal.net
+    restart: always
+    networks:
+      ingress:
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+  librespeed:
+    image: linuxserver/librespeed
+    container_name: librespeed
+    hostname: librespeed
+    domainname: brotal.net
+    restart: always
+    networks:
+      ingress:
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+  myspeed:
+    image: germannewsmaker/myspeed
+    container_name: myspeed
+    hostname: myspeed-hm
+    domainname: brotal.net
+    restart: unless-stopped
+    volumes:
+    - /data/containers/myspeed:/myspeed/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5216/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress:
+
+networks:
+  ingress:
+    external: true

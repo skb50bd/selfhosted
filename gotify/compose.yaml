@@ -1,0 +1,69 @@
+name: gotify
+
+services:
+  gotify:
+    image: gotify/server
+    container_name: gotify
+    restart: unless-stopped
+    environment:
+      GOTIFY_DEFAULTUSER_PASS: ${GOTIFY_DEFAULTUSER_PASS}
+      GOTIFY_REGISTRATION: ${GOTIFY_REGISTRATION}
+    volumes:
+      - /data/containers/gotify:/app/data:rw
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress: {}
+
+  igotify:
+    container_name: igotify
+    hostname: igotify
+    image: ghcr.io/androidseb25/igotify-notification-assist:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      gotify:
+        condition: service_healthy
+    networks:
+      - ingress
+    volumes:
+      - /data/containers/igotify/:/app/data:rw
+    environment:
+      GOTIFY_URLS: ${GOTIFY_URLS:-}
+      GOTIFY_CLIENT_TOKENS: ${GOTIFY_CLIENT_TOKENS:-}
+      SECNTFY_TOKENS: ${SECNTFY_TOKENS:-}
+      ENABLE_CONSOLE_LOG: ${ENABLE_CONSOLE_LOG:-'true'}
+      ENABLE_SCALAR_UI: ${ENABLE_SCALAR_UI:-'true'}
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/Version"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ingress:
+    external: true
