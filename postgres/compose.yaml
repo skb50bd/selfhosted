@@ -25,7 +25,6 @@ services:
     container_name: postgres
     hostname: postgres
     restart: unless-stopped
-    user: ${UID:-999}:${GID:-999}
     environment:
       # Role configuration
       PG_ROLE: ${PG_ROLE:-primary}
@@ -46,25 +45,13 @@ services:
       # Configuration files - mounted with proper permissions
       - source: postgresql_conf
         target: /etc/postgresql/postgresql.conf
-        uid: "999"
-        gid: "999"
-        mode: 0440
       - source: pg_hba_conf
         target: /etc/postgresql/pg_hba.conf
-        uid: "999"
-        gid: "999"
-        mode: 0440
       # Scripts
       - source: entrypoint_sh
         target: /usr/local/bin/entrypoint.sh
-        uid: "999"
-        gid: "999"
-        mode: 0550
       - source: init_primary_sql
         target: /docker-entrypoint-initdb.d/init-primary.sql
-        uid: "999"
-        gid: "999"
-        mode: 0440
     expose:
       - "5432"
     ports:
@@ -93,7 +80,7 @@ services:
           - ${POSTGRES_DOMAIN:-pg.localhost}
 
 # ---------------------------------------------------------------------------
-# Docker Configs - mounted with specified uid/gid/mode
+# Docker Configs
 # ---------------------------------------------------------------------------
 configs:
   postgresql_conf:
