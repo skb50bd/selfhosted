@@ -60,28 +60,104 @@ openssl x509 -req -in "${CERTS_DIR}/server/server.csr" \
     -extensions v3_req -extfile "${CERTS_DIR}/server/server.cnf"
 
 # -----------------------------------------------------------------------------
-# Client Certificate for Application User (CN=appuser)
+# Client Certificate for Application User (CN=immich)
 # -----------------------------------------------------------------------------
-echo "==> Generating Client Certificate for appuser..."
+echo "==> Generating Client Certificate for immich..."
 
-cat > "${CERTS_DIR}/clients/app/client.cnf" <<EOF
+cat > "${CERTS_DIR}/clients/immich/client.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
 prompt = no
 
 [req_distinguished_name]
-CN = appuser
+CN = immich
 O = SelfHosted
 C = BD
 EOF
 
-openssl genrsa -out "${CERTS_DIR}/clients/app/client.key" 4096
-openssl req -new -key "${CERTS_DIR}/clients/app/client.key" \
-    -out "${CERTS_DIR}/clients/app/client.csr" \
-    -config "${CERTS_DIR}/clients/app/client.cnf"
-openssl x509 -req -in "${CERTS_DIR}/clients/app/client.csr" \
+openssl genrsa -out "${CERTS_DIR}/clients/immich/client.key" 4096
+openssl req -new -key "${CERTS_DIR}/clients/immich/client.key" \
+    -out "${CERTS_DIR}/clients/immich/client.csr" \
+    -config "${CERTS_DIR}/clients/immich/client.cnf"
+openssl x509 -req -in "${CERTS_DIR}/clients/immich/client.csr" \
     -CA "${CERTS_DIR}/ca/ca.crt" -CAkey "${CERTS_DIR}/ca/ca.key" \
-    -CAcreateserial -out "${CERTS_DIR}/clients/app/client.crt" \
+    -CAcreateserial -out "${CERTS_DIR}/clients/immich/client.crt" \
+    -days ${VALIDITY_DAYS}
+
+
+# -----------------------------------------------------------------------------
+# Client Certificate for Application User (CN=dockage)
+# -----------------------------------------------------------------------------
+echo "==> Generating Client Certificate for dockage..."
+
+cat > "${CERTS_DIR}/clients/dockage/client.cnf" <<EOF
+[req]
+distinguished_name = req_distinguished_name
+prompt = no
+
+[req_distinguished_name]
+CN = dockage
+O = SelfHosted
+C = BD
+EOF
+
+openssl genrsa -out "${CERTS_DIR}/clients/dockage/client.key" 4096
+openssl req -new -key "${CERTS_DIR}/clients/dockage/client.key" \
+    -out "${CERTS_DIR}/clients/dockage/client.csr" \
+    -config "${CERTS_DIR}/clients/dockage/client.cnf"
+openssl x509 -req -in "${CERTS_DIR}/clients/dockage/client.csr" \
+    -CA "${CERTS_DIR}/ca/ca.crt" -CAkey "${CERTS_DIR}/ca/ca.key" \
+    -CAcreateserial -out "${CERTS_DIR}/clients/dockage/client.crt" \
+    -days ${VALIDITY_DAYS}
+
+# -----------------------------------------------------------------------------
+# Client Certificate for Application User (CN=firefly)
+# -----------------------------------------------------------------------------
+echo "==> Generating Client Certificate for firefly..."
+
+cat > "${CERTS_DIR}/clients/firefly/client.cnf" <<EOF
+[req]
+distinguished_name = req_distinguished_name
+prompt = no
+
+[req_distinguished_name]
+CN = firefly
+O = SelfHosted
+C = BD
+EOF
+
+openssl genrsa -out "${CERTS_DIR}/clients/firefly/client.key" 4096
+openssl req -new -key "${CERTS_DIR}/clients/firefly/client.key" \
+    -out "${CERTS_DIR}/clients/firefly/client.csr" \
+    -config "${CERTS_DIR}/clients/firefly/client.cnf"
+openssl x509 -req -in "${CERTS_DIR}/clients/firefly/client.csr" \
+    -CA "${CERTS_DIR}/ca/ca.crt" -CAkey "${CERTS_DIR}/ca/ca.key" \
+    -CAcreateserial -out "${CERTS_DIR}/clients/firefly/client.crt" \
+    -days ${VALIDITY_DAYS}
+
+# -----------------------------------------------------------------------------
+# Client Certificate for Application User (CN=zitadel)
+# -----------------------------------------------------------------------------
+echo "==> Generating Client Certificate for zitadel..."
+
+cat > "${CERTS_DIR}/clients/zitadel/client.cnf" <<EOF
+[req]
+distinguished_name = req_distinguished_name
+prompt = no
+
+[req_distinguished_name]
+CN = zitadel
+O = SelfHosted
+C = BD
+EOF
+
+openssl genrsa -out "${CERTS_DIR}/clients/zitadel/client.key" 4096
+openssl req -new -key "${CERTS_DIR}/clients/zitadel/client.key" \
+    -out "${CERTS_DIR}/clients/zitadel/client.csr" \
+    -config "${CERTS_DIR}/clients/zitadel/client.cnf"
+openssl x509 -req -in "${CERTS_DIR}/clients/zitadel/client.csr" \
+    -CA "${CERTS_DIR}/ca/ca.crt" -CAkey "${CERTS_DIR}/ca/ca.key" \
+    -CAcreateserial -out "${CERTS_DIR}/clients/zitadel/client.crt" \
     -days ${VALIDITY_DAYS}
 
 # -----------------------------------------------------------------------------
@@ -115,13 +191,19 @@ openssl x509 -req -in "${CERTS_DIR}/clients/replication/client.csr" \
 echo "==> Setting file permissions..."
 chmod 600 "${CERTS_DIR}/ca/ca.key"
 chmod 600 "${CERTS_DIR}/server/server.key"
-chmod 600 "${CERTS_DIR}/clients/app/client.key"
+chmod 600 "${CERTS_DIR}/clients/immich/client.key"
+chmod 600 "${CERTS_DIR}/clients/dockage/client.key"
+chmod 600 "${CERTS_DIR}/clients/firefly/client.key"
+chmod 600 "${CERTS_DIR}/clients/zitadel/client.key"
 chmod 600 "${CERTS_DIR}/clients/replication/client.key"
 
 # Certs can be world-readable
 chmod 644 "${CERTS_DIR}/ca/ca.crt"
 chmod 644 "${CERTS_DIR}/server/server.crt"
-chmod 644 "${CERTS_DIR}/clients/app/client.crt"
+chmod 644 "${CERTS_DIR}/clients/immich/client.crt"
+chmod 644 "${CERTS_DIR}/clients/dockage/client.crt"
+chmod 644 "${CERTS_DIR}/clients/firefly/client.crt"
+chmod 644 "${CERTS_DIR}/clients/zitadel/client.crt"
 chmod 644 "${CERTS_DIR}/clients/replication/client.crt"
 
 echo "==> Certificates generated successfully in: ${CERTS_DIR}"
