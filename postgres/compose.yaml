@@ -65,8 +65,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 8
-          memory: 16G
+          cpus: ${MAX_CPU:-8}
+          memory: ${MAX_MEMORY:-16G}
         reservations:
           cpus: '0.01'
           memory: 128M
@@ -75,7 +75,7 @@ services:
       options:
         max-size: 10m
     networks:
-      ingress:
+      database:
         aliases:
           - ${POSTGRES_DOMAIN:-pg.localhost}
 
@@ -97,5 +97,7 @@ volumes:
     name: postgres-data
 
 networks:
-  ingress:
-    external: true
+  database:
+    driver: bridge
+    name: database
+    attachable: true
