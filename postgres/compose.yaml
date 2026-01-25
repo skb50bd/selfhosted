@@ -51,6 +51,18 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: 8
+          memory: 16G
+        reservations:
+          cpus: '0.01'
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
 
 volumes:
   postgres-data:
