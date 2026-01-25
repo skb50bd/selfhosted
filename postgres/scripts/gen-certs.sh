@@ -64,6 +64,8 @@ openssl x509 -req -in "${CERTS_DIR}/server/server.csr" \
 # -----------------------------------------------------------------------------
 echo "==> Generating Client Certificate for immich..."
 
+mkdir -p "${CERTS_DIR}/clients/immich"
+
 cat > "${CERTS_DIR}/clients/immich/client.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -86,34 +88,38 @@ openssl x509 -req -in "${CERTS_DIR}/clients/immich/client.csr" \
 
 
 # -----------------------------------------------------------------------------
-# Client Certificate for Application User (CN=dockage)
+# Client Certificate for Application User (CN=dockhand)
 # -----------------------------------------------------------------------------
-echo "==> Generating Client Certificate for dockage..."
+echo "==> Generating Client Certificate for dockhand..."
 
-cat > "${CERTS_DIR}/clients/dockage/client.cnf" <<EOF
+mkdir -p "${CERTS_DIR}/clients/dockhand"
+
+cat > "${CERTS_DIR}/clients/dockhand/client.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
 prompt = no
 
 [req_distinguished_name]
-CN = dockage
+CN = dockhand
 O = SelfHosted
 C = BD
 EOF
 
-openssl genrsa -out "${CERTS_DIR}/clients/dockage/client.key" 4096
-openssl req -new -key "${CERTS_DIR}/clients/dockage/client.key" \
-    -out "${CERTS_DIR}/clients/dockage/client.csr" \
-    -config "${CERTS_DIR}/clients/dockage/client.cnf"
-openssl x509 -req -in "${CERTS_DIR}/clients/dockage/client.csr" \
+openssl genrsa -out "${CERTS_DIR}/clients/dockhand/client.key" 4096
+openssl req -new -key "${CERTS_DIR}/clients/dockhand/client.key" \
+    -out "${CERTS_DIR}/clients/dockhand/client.csr" \
+    -config "${CERTS_DIR}/clients/dockhand/client.cnf"
+openssl x509 -req -in "${CERTS_DIR}/clients/dockhand/client.csr" \
     -CA "${CERTS_DIR}/ca/ca.crt" -CAkey "${CERTS_DIR}/ca/ca.key" \
-    -CAcreateserial -out "${CERTS_DIR}/clients/dockage/client.crt" \
+    -CAcreateserial -out "${CERTS_DIR}/clients/dockhand/client.crt" \
     -days ${VALIDITY_DAYS}
 
 # -----------------------------------------------------------------------------
 # Client Certificate for Application User (CN=firefly)
 # -----------------------------------------------------------------------------
 echo "==> Generating Client Certificate for firefly..."
+
+mkdir -p "${CERTS_DIR}/clients/firefly"
 
 cat > "${CERTS_DIR}/clients/firefly/client.cnf" <<EOF
 [req]
@@ -140,6 +146,8 @@ openssl x509 -req -in "${CERTS_DIR}/clients/firefly/client.csr" \
 # -----------------------------------------------------------------------------
 echo "==> Generating Client Certificate for zitadel..."
 
+mkdir -p "${CERTS_DIR}/clients/zitadel"
+
 cat > "${CERTS_DIR}/clients/zitadel/client.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -164,6 +172,8 @@ openssl x509 -req -in "${CERTS_DIR}/clients/zitadel/client.csr" \
 # Client Certificate for Replication User (CN=replicator)
 # -----------------------------------------------------------------------------
 echo "==> Generating Client Certificate for replicator..."
+
+mkdir -p "${CERTS_DIR}/clients/replication"
 
 cat > "${CERTS_DIR}/clients/replication/client.cnf" <<EOF
 [req]
@@ -192,7 +202,7 @@ echo "==> Setting file permissions..."
 chmod 600 "${CERTS_DIR}/ca/ca.key"
 chmod 600 "${CERTS_DIR}/server/server.key"
 chmod 600 "${CERTS_DIR}/clients/immich/client.key"
-chmod 600 "${CERTS_DIR}/clients/dockage/client.key"
+chmod 600 "${CERTS_DIR}/clients/dockhand/client.key"
 chmod 600 "${CERTS_DIR}/clients/firefly/client.key"
 chmod 600 "${CERTS_DIR}/clients/zitadel/client.key"
 chmod 600 "${CERTS_DIR}/clients/replication/client.key"
@@ -201,7 +211,7 @@ chmod 600 "${CERTS_DIR}/clients/replication/client.key"
 chmod 644 "${CERTS_DIR}/ca/ca.crt"
 chmod 644 "${CERTS_DIR}/server/server.crt"
 chmod 644 "${CERTS_DIR}/clients/immich/client.crt"
-chmod 644 "${CERTS_DIR}/clients/dockage/client.crt"
+chmod 644 "${CERTS_DIR}/clients/dockhand/client.crt"
 chmod 644 "${CERTS_DIR}/clients/firefly/client.crt"
 chmod 644 "${CERTS_DIR}/clients/zitadel/client.crt"
 chmod 644 "${CERTS_DIR}/clients/replication/client.crt"
