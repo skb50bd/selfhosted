@@ -1,0 +1,9 @@
+# Ignore generated certificates
+certs/
+
+# Ignore any .env files with secrets
+.env
+.env.*
+
+# Ignore data volumes if you're storing them locally
+data/
