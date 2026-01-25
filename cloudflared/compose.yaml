@@ -4,6 +4,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
+    hostname: ${CLOUDFLARED_HOSTNAME:-cloudflared}
     command:
       - tunnel
       - --no-autoupdate
