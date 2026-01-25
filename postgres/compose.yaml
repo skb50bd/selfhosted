@@ -25,6 +25,7 @@ services:
     container_name: postgres
     hostname: postgres
     restart: unless-stopped
+    user: ${UID:-999}:${GID:-999}
     environment:
       # Role configuration
       PG_ROLE: ${PG_ROLE:-primary}
