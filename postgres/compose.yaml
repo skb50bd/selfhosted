@@ -1,5 +1,5 @@
 # =============================================================================
-# PostgreSQL with pgvector and Caddy L4 TLS Proxy
+# PostgreSQL with pgvector
 # =============================================================================
 # Single compose file for all instances - role determined by environment.
 #
@@ -13,7 +13,7 @@
 #   PRIMARY_PORT         - Port of primary (default: 5432)
 #   POSTGRES_PASSWORD    - Superuser password (default: postgres)
 #   REPLICATION_PASSWORD - Password for replicator user
-#   POSTGRES_DOMAIN      - Domain for TLS cert (e.g., pg.example.com)
+#   POSTGRES_DOMAIN      - Domain/alias (e.g., pg.example.com)
 # =============================================================================
 
 services:
@@ -42,13 +42,29 @@ services:
     volumes:
       # Data persistence
       - postgres-data:/var/lib/postgresql/data
-      # Configuration files
-      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
-      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    configs:
+      # Configuration files - mounted with proper permissions
+      - source: postgresql_conf
+        target: /etc/postgresql/postgresql.conf
+        uid: "999"
+        gid: "999"
+        mode: 0440
+      - source: pg_hba_conf
+        target: /etc/postgresql/pg_hba.conf
+        uid: "999"
+        gid: "999"
+        mode: 0440
       # Scripts
-      - ./scripts/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
-      - ./scripts/init-primary.sql:/docker-entrypoint-initdb.d/init-primary.sql:ro
-    # No external ports - Caddy handles external access
+      - source: entrypoint_sh
+        target: /usr/local/bin/entrypoint.sh
+        uid: "999"
+        gid: "999"
+        mode: 0550
+      - source: init_primary_sql
+        target: /docker-entrypoint-initdb.d/init-primary.sql
+        uid: "999"
+        gid: "999"
+        mode: 0440
     expose:
       - "5432"
     ports:
@@ -76,12 +92,23 @@ services:
         aliases:
           - ${POSTGRES_DOMAIN:-pg.localhost}
 
+# ---------------------------------------------------------------------------
+# Docker Configs - mounted with specified uid/gid/mode
+# ---------------------------------------------------------------------------
+configs:
+  postgresql_conf:
+    file: ./config/postgresql.conf
+  pg_hba_conf:
+    file: ./config/pg_hba.conf
+  entrypoint_sh:
+    file: ./scripts/entrypoint.sh
+  init_primary_sql:
+    file: ./scripts/init-primary.sql
+
 volumes:
   postgres-data:
     name: postgres-data
-  caddy-data:
-  caddy-config:
 
-networks: 
+networks:
   ingress:
     external: true
