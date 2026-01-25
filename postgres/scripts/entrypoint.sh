@@ -13,12 +13,7 @@ PGDATA="${PGDATA:-/var/lib/postgresql/data}"
 PRIMARY_HOST="${PRIMARY_HOST:-}"
 PRIMARY_PORT="${PRIMARY_PORT:-5432}"
 REPLICATION_USER="${REPLICATION_USER:-replicator}"
-
-# Certificate paths
-CERT_DIR="/var/lib/postgresql/certs"
-CLIENT_CERT="${CERT_DIR}/clients/replication/client.crt"
-CLIENT_KEY="${CERT_DIR}/clients/replication/client.key"
-CA_CERT="${CERT_DIR}/ca/ca.crt"
+REPLICATION_PASSWORD="${REPLICATION_PASSWORD:-}"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -34,6 +29,11 @@ setup_replica() {
 
     if [ -z "${PRIMARY_HOST}" ]; then
         log "ERROR: PRIMARY_HOST is required for replica mode"
+        exit 1
+    fi
+
+    if [ -z "${REPLICATION_PASSWORD}" ]; then
+        log "ERROR: REPLICATION_PASSWORD is required for replica mode"
         exit 1
     fi
 
@@ -61,8 +61,8 @@ setup_replica() {
         chmod 700 "${PGDATA}"
         chown postgres:postgres "${PGDATA}"
 
-        # Run pg_basebackup with certificate authentication
-        pg_basebackup \
+        # Run pg_basebackup with password authentication
+        PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup \
             -h "${PRIMARY_HOST}" \
             -p "${PRIMARY_PORT}" \
             -U "${REPLICATION_USER}" \
@@ -71,20 +71,18 @@ setup_replica() {
             -Xs \
             -P \
             -R \
-            --checkpoint=fast \
-            --no-password \
-            -d "sslmode=verify-ca sslcert=${CLIENT_CERT} sslkey=${CLIENT_KEY} sslrootcert=${CA_CERT}"
+            --checkpoint=fast
 
         log "==> pg_basebackup completed successfully."
 
         # Ensure standby.signal exists
         touch "${PGDATA}/standby.signal"
 
-        # Configure primary_conninfo with certificate auth
+        # Configure primary_conninfo with password auth
         cat >> "${PGDATA}/postgresql.auto.conf" <<EOF
 
-# Replication connection info (certificate auth, async)
-primary_conninfo = 'host=${PRIMARY_HOST} port=${PRIMARY_PORT} user=${REPLICATION_USER} sslmode=verify-ca sslcert=${CLIENT_CERT} sslkey=${CLIENT_KEY} sslrootcert=${CA_CERT} application_name=${HOSTNAME}'
+# Replication connection info (password auth, async)
+primary_conninfo = 'host=${PRIMARY_HOST} port=${PRIMARY_PORT} user=${REPLICATION_USER} password=${REPLICATION_PASSWORD} application_name=${HOSTNAME}'
 EOF
 
         chown -R postgres:postgres "${PGDATA}"

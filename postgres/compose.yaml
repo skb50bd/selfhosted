@@ -1,5 +1,5 @@
 # =============================================================================
-# PostgreSQL with pgvector, TLS, and Async Replication
+# PostgreSQL with pgvector and Caddy L4 TLS Proxy
 # =============================================================================
 # Single compose file for all instances - role determined by environment.
 #
@@ -8,13 +8,18 @@
 #   Replica:  PG_ROLE=replica PRIMARY_HOST=primary.example.com docker compose up -d
 #
 # ENVIRONMENT VARIABLES:
-#   PG_ROLE          - "primary" or "replica" (default: primary)
-#   PRIMARY_HOST     - Hostname/IP of primary (required for replicas)
-#   PRIMARY_PORT     - Port of primary (default: 5432)
-#   POSTGRES_PASSWORD - Superuser password (default: postgres)
+#   PG_ROLE              - "primary" or "replica" (default: primary)
+#   PRIMARY_HOST         - Hostname/IP of primary (required for replicas)
+#   PRIMARY_PORT         - Port of primary (default: 5432)
+#   POSTGRES_PASSWORD    - Superuser password (default: postgres)
+#   REPLICATION_PASSWORD - Password for replicator user
+#   POSTGRES_DOMAIN      - Domain for TLS cert (e.g., pg.example.com)
 # =============================================================================
 
 services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL with pgvector
+  # ---------------------------------------------------------------------------
   postgres:
     image: pgvector/pgvector:pg18
     container_name: postgres
@@ -26,6 +31,7 @@ services:
       PRIMARY_HOST: ${PRIMARY_HOST:-}
       PRIMARY_PORT: ${PRIMARY_PORT:-5432}
       REPLICATION_USER: replicator
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-}
       # PostgreSQL settings
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -38,13 +44,12 @@ services:
       # Configuration files
       - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      # Certificates
-      - ./certs:/var/lib/postgresql/certs:ro
       # Scripts
       - ./scripts/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - ./scripts/init-primary.sql:/docker-entrypoint-initdb.d/init-primary.sql:ro
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+    # No external ports - Caddy handles external access
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
@@ -63,7 +68,17 @@ services:
       driver: json-file
       options:
         max-size: 10m
+    networks:
+      ingress:
+        aliases:
+          - ${POSTGRES_DOMAIN:-pg.localhost}
 
 volumes:
   postgres-data:
     name: postgres-data
+  caddy-data:
+  caddy-config:
+
+networks: 
+  ingress:
+    external: true

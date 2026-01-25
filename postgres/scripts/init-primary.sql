@@ -7,52 +7,17 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- -----------------------------------------------------------------------------
--- Create replication user (for streaming replication)
--- Uses certificate authentication (no password needed, but REPLICATION privilege required)
+-- Create replication user with password from environment
+-- Password is set via ALTER ROLE since CREATE ROLE doesn't support env vars
 -- -----------------------------------------------------------------------------
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'replicator') THEN
-        CREATE ROLE replicator WITH REPLICATION LOGIN;
-        RAISE NOTICE 'Created replicator role';
+        CREATE ROLE replicator WITH REPLICATION LOGIN PASSWORD 'changeme';
+        RAISE NOTICE 'Created replicator role (password should be changed via ALTER ROLE)';
     END IF;
 END
 $$;
-
--- -----------------------------------------------------------------------------
--- Create application user with cert auth (CN=appuser)
--- -----------------------------------------------------------------------------
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'appuser') THEN
-        CREATE ROLE appuser WITH LOGIN;
-        RAISE NOTICE 'Created appuser role';
-    END IF;
-END
-$$;
-
--- Grant appuser access to default database
-GRANT CONNECT ON DATABASE postgres TO appuser;
-GRANT USAGE ON SCHEMA public TO appuser;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO appuser;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO appuser;
-
--- -----------------------------------------------------------------------------
--- Create password-authenticated user (for testing password auth)
--- -----------------------------------------------------------------------------
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pwduser') THEN
-        CREATE ROLE pwduser WITH LOGIN PASSWORD 'pwduser_secret';
-        RAISE NOTICE 'Created pwduser role';
-    END IF;
-END
-$$;
-
-GRANT CONNECT ON DATABASE postgres TO pwduser;
-GRANT USAGE ON SCHEMA public TO pwduser;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pwduser;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO pwduser;
 
 -- -----------------------------------------------------------------------------
 -- Create a replication slot for the replica (optional but good practice)
