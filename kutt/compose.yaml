@@ -1,6 +1,6 @@
 services:
   server:
-    image: kutt/server:latest
+    image: kutt/kutt:latest
     restart: unless-stopped
     container_name: kutt
     hostname: kutt
