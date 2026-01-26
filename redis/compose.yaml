@@ -3,7 +3,9 @@ name: redis
 services:
   redis:
     image: redis:alpine
-    restart: always
+    restart: unless-stopped
+    container_name: redis
+    hostname: redis
     expose:
       - 6379
     deploy:
