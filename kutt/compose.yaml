@@ -13,6 +13,7 @@ services:
       DB_NAME: ${POSTGRES_DB:-kutt}
       DB_USER: ${POSTGRES_USER:-kutt}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-kutt}
+      JWT_SECRET: ${JWT_SECRET:-please_change_me}
       PORT: ${PORT:-3000}
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_HOST: ${REDIS_HOST:-redis}
