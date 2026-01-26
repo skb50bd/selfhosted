@@ -1,0 +1,43 @@
+services:
+  server:
+    image: kutt/server:latest
+    restart: unless-stopped
+    container_name: kutt
+    hostname: kutt
+    volumes:
+      - /data/containers/kutt/custom:/kutt/custom
+    environment:
+      DB_CLIENT: pg
+      DB_HOST: ${POSTGRES_HOST:-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ${POSTGRES_DB:-kutt}
+      DB_USER: ${POSTGRES_USER:-kutt}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-kutt}
+      REDIS_ENABLED: true
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+    # ports:
+    #   - 3000:3000
+    deploy:
+      resources:
+        limits:
+          cpus: ${MAX_CPU:-2}
+          memory: ${MAX_MEMORY:-4G}
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      database: {}
+      ingress: {}
+
+networks:
+  database:
+    external: true
+    name: database
+  ingress:
+    external: true
+    name: ingress
