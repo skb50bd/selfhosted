@@ -1,0 +1,26 @@
+name: whoami
+
+services:
+  whoami:
+    image: traefik/whoami
+    restart: unless-stopped
+    container_name: whoami
+    hostname: whoami
+    expose:
+      - 80
+    networks:
+      - ingress
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    name: ingress
+    external: true
