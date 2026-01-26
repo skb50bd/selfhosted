@@ -13,9 +13,15 @@ services:
       DB_NAME: ${POSTGRES_DB:-kutt}
       DB_USER: ${POSTGRES_USER:-kutt}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-kutt}
-      REDIS_ENABLED: true
+      PORT: ${PORT:-3000}
+      REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
+      SITE_NAME: ${SITE_NAME:-Kutt}
+      DEFAULT_DOMAIN: ${SITE_NAME:-localhost:3000}
+      LINK_LENGTH: ${LINK_LENGTH:-6}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      CUSTOM_DOMAIN_USE_HTTPS: ${CUSTOM_DOMAIN_USE_HTTPS:-true}
     # ports:
     #   - 3000:3000
     deploy:
