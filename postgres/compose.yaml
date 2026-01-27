@@ -25,6 +25,8 @@ services:
     container_name: postgres
     hostname: postgres
     restart: unless-stopped
+    labels:
+      komodo.skip: "true"
     environment:
       # Role configuration
       PG_ROLE: ${PG_ROLE:-primary}
@@ -79,6 +81,37 @@ services:
         aliases:
           - ${POSTGRES_DOMAIN:-pg.localhost}
 
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb
+    hostname: ferretdb
+    labels:
+      komodo.skip: "true"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      FERRETDB_POSTGRESQL_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+    expose:
+     - 27017
+    volumes:
+      - ferretdb-state:/state
+    deploy:
+      resources:
+        limits:
+          cpus: ${MAX_CPU:-2}
+          memory: ${MAX_MEMORY:-2G}
+        reservations:
+          cpus: '0.01'
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      database:
+        aliases:
+          - ${FERRETDDB_DOMAIN:-ferretdb.localhost}
+ 
 # ---------------------------------------------------------------------------
 # Docker Configs
 # ---------------------------------------------------------------------------
@@ -95,6 +128,8 @@ configs:
 volumes:
   postgres-data:
     name: postgres-data
+  ferretdb-state:
+    name: ferretdb-state
 
 networks:
   database:

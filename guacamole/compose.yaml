@@ -1,0 +1,32 @@
+name: guacamole
+
+services:
+  guacamole:
+    image: guacamole/guacd
+    restart: unless-stopped
+    container_name: guacd
+    hostname: guacd
+    expose:
+      - 4822
+    networks:
+      - ingress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:4822/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    name: ingress
+    external: true
