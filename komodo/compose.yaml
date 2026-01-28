@@ -1,0 +1,67 @@
+services:
+  komodo:
+    image: ghcr.io/moghtech/komodo-core:latest
+    restart: unless-stopped
+    container_name: komodo
+    hostname: komodo
+    volumes:
+      - /data/containers/komodo/backups:/backups
+    env_file: ./env
+    expose:
+      - 9120
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9120/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: ${MAX_CPU:-2}
+          memory: ${MAX_MEMORY:-4G}
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      database: {}
+      ingress: {}
+
+  periphery:
+    image: ghcr.io/moghtech/komodo-periphery:latest
+    container_name: komodo-periphery
+    hostname: komodo-periphery
+    labels:
+      komodo.skip:
+    restart: unless-stopped
+    env_file: ./env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/proc
+      - ${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}:${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}
+    deploy:
+      resources:
+        limits:
+          cpus: ${MAX_CPU:-2}
+          memory: ${MAX_MEMORY:-4G}
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      database: {}
+      ingress: {}
+
+networks:
+  database:
+    external: true
+    name: database
+  ingress:
+    external: true
+    name: ingress
