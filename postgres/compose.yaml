@@ -81,20 +81,20 @@ services:
         aliases:
           - ${POSTGRES_DOMAIN:-pg.localhost}
 
-  ferretdb:
-    image: ghcr.io/ferretdb/ferretdb
-    hostname: ferretdb
+  mongo:
+    image: mongo
+    hostname: mongo
     labels:
       komodo.skip: "true"
     restart: unless-stopped
-    depends_on:
-      - postgres
     environment:
-      FERRETDB_POSTGRESQL_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-mongo}
     expose:
      - 27017
     volumes:
-      - ferretdb-state:/state
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
     deploy:
       resources:
         limits:
@@ -110,7 +110,7 @@ services:
     networks:
       database:
         aliases:
-          - ${FERRETDDB_DOMAIN:-ferretdb.localhost}
+          - ${MONGO_DOMAIN:-mongo.localhost}
  
 # ---------------------------------------------------------------------------
 # Docker Configs
@@ -128,8 +128,10 @@ configs:
 volumes:
   postgres-data:
     name: postgres-data
-  ferretdb-state:
-    name: ferretdb-state
+  mongo-data:
+    name: mongo-data
+  mongo-config:
+    name: mongo-config
 
 networks:
   database:
