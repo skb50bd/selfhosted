@@ -23,8 +23,13 @@ services:
       LINK_LENGTH: ${LINK_LENGTH:-6}
       TRUST_PROXY: ${TRUST_PROXY:-true}
       CUSTOM_DOMAIN_USE_HTTPS: ${CUSTOM_DOMAIN_USE_HTTPS:-true}
-    # ports:
-    #   - 3000:3000
+    expose:
+      - ${PORT:-3000}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${PORT:-3000}/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     deploy:
       resources:
         limits:
