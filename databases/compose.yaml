@@ -8,12 +8,14 @@
 #   Replica:  PG_ROLE=replica PRIMARY_HOST=primary.example.com docker compose up -d
 #
 # ENVIRONMENT VARIABLES:
-#   PG_ROLE              - "primary" or "replica" (default: primary)
-#   PRIMARY_HOST         - Hostname/IP of primary (required for replicas)
-#   PRIMARY_PORT         - Port of primary (default: 5432)
-#   POSTGRES_PASSWORD    - Superuser password (default: postgres)
-#   REPLICATION_PASSWORD - Password for replicator user
-#   POSTGRES_DOMAIN      - Domain/alias (e.g., pg.example.com)
+#   PG_ROLE                    - "primary" or "replica" (default: primary)
+#   PRIMARY_HOST               - Hostname/IP of primary (required for replicas)
+#   PRIMARY_PORT               - Port of primary (default: 5432)
+#   POSTGRES_PASSWORD          - Superuser password (default: postgres)
+#   REPLICATION_PASSWORD       - Password for replicator user
+#   POSTGRES_DOMAIN            - Domain/alias (e.g., pg.example.com)
+#   MONGO_INITDB_ROOT_USERNAME - Root username for MongoDB (default: mongo)
+#   MONGO_INITDB_ROOT_PASSWORD - Root password for MongoDB (default: mongo)
 # =============================================================================
 
 services:
@@ -95,6 +97,12 @@ services:
     volumes:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     deploy:
       resources:
         limits:
