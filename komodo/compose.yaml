@@ -6,7 +6,7 @@ services:
     hostname: komodo
     volumes:
       - /data/containers/komodo/backups:/backups
-    env_file: ./env
+    env_file: .env
     expose:
       - 9120
     healthcheck:
@@ -37,7 +37,7 @@ services:
     labels:
       komodo.skip:
     restart: unless-stopped
-    env_file: ./env
+    env_file: .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc:/proc
