@@ -98,7 +98,7 @@ services:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand({ ping: 1 })"]
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       timeout: 5s
       retries: 10
