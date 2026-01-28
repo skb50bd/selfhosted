@@ -29,6 +29,7 @@ services:
     networks:
       database: {}
       ingress: {}
+      komodo: {}
 
   periphery:
     image: ghcr.io/moghtech/komodo-periphery:latest
@@ -55,8 +56,7 @@ services:
       options:
         max-size: 10m
     networks:
-      database: {}
-      ingress: {}
+      komodo: {}
 
 networks:
   database:
@@ -65,3 +65,6 @@ networks:
   ingress:
     external: true
     name: ingress
+  komodo:
+    driver: local
+    name: komodo-internal
