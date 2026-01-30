@@ -12,6 +12,7 @@ services:
     environment:
       - WARP_SLEEP=2
       - WARP_LICENSE_KEY=${WARP_LICENSE_KEY:-}
+      - WARP_ENABLE_NAT=${WARP_ENABLE_NAT:-true}
     healthcheck:
       # Tests if the 'warp' status in the trace is either 'on' or 'plus'
       test: ["CMD-SHELL", "curl -fsS https://www.cloudflare.com/cdn-cgi/trace | grep -qE 'warp=(plus|on)' || exit 1"]
@@ -33,6 +34,10 @@ services:
     networks:
       warp: {}
       ingress: {}
+    expose:
+      - 1080
+    ports:
+      - 1080:1080
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
