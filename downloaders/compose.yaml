@@ -33,6 +33,8 @@ services:
     networks:
       warp: {}
       ingress: {}
+    ports:
+      - 8291:8291
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
