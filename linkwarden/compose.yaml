@@ -1,0 +1,57 @@
+name: linkwarden
+
+services:
+  linkwarden:
+    image: ghcr.io/linkwarden/linkwarden:latest # comment to build from source
+    container_name: linkwarden
+    restart: unless-stopped
+    hostname: linkwarden
+    environment:
+      - DATABASE_URL=postgresql://linkwarden:${DB_PASSWORD}@postgres:5432/linkwarden
+    ports:
+      - 3000
+    volumes:
+      - /data/containers/linkwarden/data:/data/data
+    depends_on:
+      - meilisearch
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress:
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12.8
+    container_name: meilisearch
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Dhaka
+    volumes:
+      - /data/containers/linkwarden/meili:/meili_data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    networks:
+      ingress:
+
+networks:
+  ingress:
+    external: true

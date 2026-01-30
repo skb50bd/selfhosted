@@ -2,11 +2,11 @@ name: it-tools
 
 services:
   itTools:
-    container_name: it-tools
     image: corentinth/it-tools:latest
+    container_name: it-tools
+    restart: unless-stopped
     environment:
       TZ: Asia/Dhaka
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--retry", "3", "--max-time", "5", "http://localhost"]
       interval: 30s
