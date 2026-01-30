@@ -21,7 +21,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /root/.config/rclone:/root/.config/rclone:ro
       - /data/containers/zerobyte:/var/lib/zerobyte
-      - /mnt/ts1TB/backup:/mnt/backup:ro
+      - /data/containers/:/mnt/containers:ro
+      - /data/docker/volumes:/mnt/volumes:ro
+      - /mnt/ts1TB/backup:/mnt/backup:rw
     networks:
       ingress: {}
     deploy:
