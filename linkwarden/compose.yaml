@@ -28,6 +28,7 @@ services:
         max-size: 10m
     networks:
       ingress:
+      database:
 
   meilisearch:
     image: getmeili/meilisearch:v1.12.8
@@ -55,3 +56,7 @@ services:
 networks:
   ingress:
     external: true
+    name: ingress
+  database:
+    external: true
+    name: database
