@@ -27,8 +27,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: ${MAX_CPU:-4}
+          memory: ${MAX_MEMORY:-2G}
         reservations:
           cpus: '0.001'
           memory: 64M
