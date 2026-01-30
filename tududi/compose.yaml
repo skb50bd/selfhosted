@@ -1,7 +1,7 @@
 services:
   tududi:
     image: chrisvel/tududi:latest
-    container_name: tududi  
+    container_name: tududi
     networks:
       ingress: {}
     expose:

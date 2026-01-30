@@ -1,7 +1,7 @@
 name: omni-tools
 
 services:
-  omni-tools:
+  omniTools:
     image: iib0011/omni-tools:latest
     container_name: omni-tools
     restart: unless-stopped

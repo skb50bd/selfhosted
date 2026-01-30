@@ -1,8 +1,8 @@
 name: it-tools
 
 services:
-  tools:
-    container_name: tools
+  itTools:
+    container_name: it-tools
     image: corentinth/it-tools:latest
     environment:
       TZ: Asia/Dhaka
