@@ -14,8 +14,8 @@ services:
       - ${PROJECTS_PATH:-/srv/stacks}:/app/data/projects
     environment:
       - APP_URL=http://localhost:3552
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-CcojW9vUTXHi6wr87rr94yY5SuqVBlmk}
       - JWT_SECRET=${JWT_SECRET:-kCS7R9uDGdgvzJpu8mgvkSFGqr9JgKEr}
     networks:
