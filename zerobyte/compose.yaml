@@ -1,0 +1,43 @@
+name: zerobyte
+
+services:
+  zerobyte:
+    image: ghcr.io/nicotsx/zerobyte:v0.24
+    container_name: zerobyte
+    hostname: zerobyte
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    expose:
+      - 4096
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      - TZ=${TZ:-Asia/Dhaka}
+      - BASE_URL=${BASE_URL:-http://localhost:4096}
+      - TRUSTED_ORIGINS=${TRUSTED_ORIGINS:-http://localhost:4096}
+      - APP_SECRET=${APP_SECRET:-apmzYF1oYIIV9PfTyuVyzVy3bqCKu0yR}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /root/.config/rclone:/root/.config/rclone:ro
+      - /data/containers/zerobyte:/var/lib/zerobyte
+      - /mnt/ts1TB/backup:/mnt/backup:ro
+    networks:
+      ingress: {}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    external: true
+    name: ingress

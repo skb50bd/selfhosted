@@ -1,0 +1,54 @@
+name: gocost
+
+services:
+  gocost:
+    image: ghcr.io/madalinpopa/gocost-web:${VERSION:-latest}
+    container_name: gocost
+    hostname: gocost
+    restart: unless-stopped
+    expose:
+      - 4000
+    environment:
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost}
+      DOMAIN: ${DOMAIN:-localhost}
+      CURRENCY: ${CURRENCY:-$}
+      DB_PATH: /app/data/data.sqlite
+    volumes:
+      - /data/containers/gocost/data:/app/data
+      - /data/containers/gocost/uploads:/app/uploads
+    networks:
+      ingress: {}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:4000/",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ingress:
+    external: true
+    name: ingress
