@@ -8,7 +8,7 @@ services:
     hostname: linkwarden
     environment:
       - DATABASE_URL=postgresql://linkwarden:${DB_PASSWORD}@postgres:5432/linkwarden
-      - NEXTAUTH_URL=${LINKWARDEN_URL:-https://localhost:3000}/api/v1/auth
+      - NEXTAUTH_URL=${LINKWARDEN_URL:-http://localhost:3000}/api/v1/auth
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-eC4f5sXpG1Kl4jsXZU0BjrQy4hboQQ1z}
       - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-C9VtI8b35Cv2376AUvMHJo74K7Afdse2}
     ports:
