@@ -1,0 +1,38 @@
+services:
+  tududi:
+    image: chrisvel/tududi:latest
+    container_name: tududi  
+    networks:
+      ingress: {}
+    expose:
+      - 3002
+    environment:
+      - TUDUDI_USER_EMAIL=${TUDUDI_USER_EMAIL}
+      - TUDUDI_USER_PASSWORD=${TUDUDI_USER_PASSWORD}
+      - TUDUDI_SESSION_SECRET=${TUDUDI_SESSION_SECRET}
+    volumes:
+      - /data/containers/tududi/db:/app/backend/db:rw
+      - /data/containers/tududi/uploads:/app/backend/uploads:rw
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512M
+        reservations:
+          cpus: '0.001'
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+networks:
+  ingress:
+    external: true
